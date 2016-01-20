@@ -1,4 +1,4 @@
-package com.tdongsi;
+package com.tdongsi.aws;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

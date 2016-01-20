@@ -1,4 +1,4 @@
-package com.tdongsi;
+package com.tdongsi.aws;
 
 /**
  * Hello world!
