@@ -45,34 +45,31 @@ Task 3.4: Offload Static Content to S3
 ==================================================================================================================
 
 Step 3.4.2:
-aws s3 ls <bucket_name> --region <region>
+aws s3 ls dstc2016 --region us-west-1
 
 Step 3.4.3:
 cd /home/ec2-user/lab1src
 
 Step 3.4.4:
-aws s3 cp /home/ec2-user/lab1src/jquery/ s3://<bucket_name>/jquery/ --recursive --acl public-read --region <region>
+aws s3 cp /home/ec2-user/lab1src/jquery/ s3://dstc2016/jquery/ --recursive --acl public-read --region us-west-1
 
 Step 3.4.5:
-aws s3 cp /home/ec2-user/lab1src/images/ s3://<bucket_name>/images/ --recursive --acl public-read --region <region>
+aws s3 cp /home/ec2-user/lab1src/images/ s3://dstc2016/images/ --recursive --acl public-read --region us-west-1
 
 Step 3.4.6:
-aws s3 ls s3://<bucket_name>/ --region <region> --recursive
+aws s3 ls s3://dstc2016/ --region us-west-1 --recursive
 
 Step 3.4.7:
-sudo sed -i '2s/%region%/<region>/g' /var/www/html/*.php
+sudo sed -i '2s/%region%/us-west-1/g' /var/www/html/*.php
 
-sudo sed -i '3s/%bucket%/<bucket_name>/g' /var/www/html/*.php
+sudo sed -i '3s/%bucket%/dstc2016/g' /var/www/html/*.php
 
 Step 3.4.16:
-aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services1.json --region <region>
+aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services1.json --region us-west-1
 
-aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services2.json --region <region>
+aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services2.json --region us-west-1
 
-aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services3.json --region <region>
+aws dynamodb batch-write-item --request-items file:///home/ec2-user/lab1src/scripts/services3.json --region us-west-1
 
 Step 3.4.17 (optional):
-aws dynamodb scan --table-name AWS-Services --region <region>
-
-
-Copyright 2016 Amazon Web Services, Inc. or its affiliates. All rights reserved.
+aws dynamodb scan --table-name AWS-Services --region us-west-1
