@@ -1,0 +1,141 @@
+Architecting on AWS: Lab 4 - Implementing a Serverless Architecture With AWS Managed Services - v5.0
+
+
+==================================================================================================================
+
+Using this command reference.
+
+==================================================================================================================
+
+
+1. Locate the section you need. Each section in this file matches a section in the lab instructions.
+
+2. Replace items in angle brackets - < > - with appropriate values. For example, in this command you would replace the value - <JobFlowID> - (including the angle brackets) with the parameter indicated in the lab instructions:
+
+elastic-mapreduce --list <JobFlowID>. You can also use find and replace to change bracketed parameters in bulk.
+
+3. Do NOT enable the Word Wrap feature in Windows Notepad or the text editor you use to view this file.
+
+++++ Task 3: Configuring Lambda Functions ++++
+
+==================================================================================================================
+Task 3.1: Create Lambda Function to Process Transactions Text File
+==================================================================================================================
+
+3.1.7 Copy and paste the code for the Lambda function.
+
+from __future__ import print_function
+
+import json
+import urllib
+import boto3
+import csv
+
+print('Loading function')
+
+customerTableName = 'Customer'
+transactionsTableName = 'Transactions'
+
+s3 = boto3.resource('s3')
+dynamodb = boto3.resource('dynamodb')
+customerTable = dynamodb.Table(customerTableName);
+transactionsTable = dynamodb.Table(transactionsTableName);
+
+def lambda_handler(event, context):
+    print("Received event: " + json.dumps(event, indent=2))
+
+    # Get the bucket and object key from the event
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    key = urllib.unquote_plus(event['Records'][0]['s3']['object']['key']).decode('utf8')
+    trnFileName = '/tmp/transactions.txt'
+    try:
+        s3.meta.client.download_file(bucket, key, trnFileName)
+    except Exception as e:
+        print(e)
+        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
+        raise e
+
+    # Read the Transactions CSV file. Delimiter is the '|' character
+    with open(trnFileName) as csvfile:
+        reader = csv.DictReader(csvfile, delimiter='|')
+        for row in reader:
+            print(row['customer_id'], row['customer_address'], row['trn_id'], row['trn_date'], row['trn_amount'])
+            # Insert customer id and address in customer DynamoDB table
+            try:
+                resp = customerTable.put_item(
+                    Item={
+                        'CustomerId': row['customer_id'],
+                        'Address': row['customer_address']})
+                resp = transactionsTable.put_item(
+                    Item={
+                        'CustomerId': row['customer_id'],
+                        'TransactionId': row['trn_id'],
+                        'TransactionDate': row['trn_date'],
+                        'TransactionAmount': int(row['trn_amount'])})
+            except Exception as e:
+                 print(e)
+                 print("Unable to insert data into DynamoDB table".format(e))
+
+    return "done"
+
+	
+	
+==================================================================================================================
+Task 3.2: Create Lambda Function to Calculate Transaction Totals and Notify About High Account Balances
+==================================================================================================================
+
+3.2.7 Copy and paste the code for the Lambda function.
+
+from __future__ import print_function
+
+import json
+import boto3
+
+print('Loading function')
+
+### STUDENT TODO: Update the value of snsTopicArn ###
+snsTopicArn = '<ARN for HighAccountBalanceAlertSNSTopic>'
+
+dynamodb = boto3.resource('dynamodb')
+transactionTotalTableName = 'TransactionTotal'
+transactionsTotalTable = dynamodb.Table(transactionTotalTableName);
+
+sns = boto3.client('sns')
+
+def lambda_handler(event, context):
+    print("Received event: " + json.dumps(event, indent=2))
+    for record in event['Records']:
+        customerId = record['dynamodb']['NewImage']['CustomerId']['S']
+        transactionAmount = int(record['dynamodb']['NewImage']['TransactionAmount']['N'])
+
+        response = transactionsTotalTable.update_item(
+            Key={
+                'CustomerId': customerId
+            },
+            UpdateExpression="add accountBalance :val",
+            ExpressionAttributeValues={
+                ':val': transactionAmount
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+        print("Added transaction to account balance in TransactionTotal table")
+
+        latestAccountBalance = response['Attributes']['accountBalance']
+        print("Latest account balance: ".format(latestAccountBalance))
+
+        if latestAccountBalance  >= 1500:
+            message = '{"customerID": "' + customerId + '", ' + '"accountBalance": "' + str(latestAccountBalance) + '"}'
+            print(message)
+            print("Account balance is very high: ".format(latestAccountBalance))
+            sns.publish(
+                TopicArn=snsTopicArn,
+                Message=message,
+                Subject='Warning! Account balance is very high',
+                MessageStructure='raw'
+            )
+
+
+    return 'Successfully processed {} records.'.format(len(event['Records']))
+
+
+
