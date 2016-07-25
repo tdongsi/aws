@@ -1,22 +1,7 @@
 Architecting on AWS: Lab 4 - Implementing a Serverless Architecture With AWS Managed Services - v5.0
 
 
-==================================================================================================================
-
-Using this command reference.
-
-==================================================================================================================
-
-
-1. Locate the section you need. Each section in this file matches a section in the lab instructions.
-
-2. Replace items in angle brackets - < > - with appropriate values. For example, in this command you would replace the value - <JobFlowID> - (including the angle brackets) with the parameter indicated in the lab instructions:
-
-elastic-mapreduce --list <JobFlowID>. You can also use find and replace to change bracketed parameters in bulk.
-
-3. Do NOT enable the Word Wrap feature in Windows Notepad or the text editor you use to view this file.
-
-++++ Task 3: Configuring Lambda Functions ++++
+arn:aws:sns:us-west-2:083934776780:HighAccountBalanceAlertSNSTopic
 
 ==================================================================================================================
 Task 3.1: Create Lambda Function to Process Transactions Text File
