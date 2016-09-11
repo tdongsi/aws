@@ -2,8 +2,6 @@ package my.spring.dasboot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,42 +9,34 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import my.spring.dasboot.model.Shipwreck;
-import my.spring.dasboot.repository.ShipwreckRepository;
 
 @RestController
 @RequestMapping("api/v1/")
-public class ShipwreckController {
-	
-	@Autowired
-	private ShipwreckRepository repo;
+public class ShipwreckControllerMemory {
 	
 	@RequestMapping(value = "shipwrecks", method = RequestMethod.GET)
 	public List<Shipwreck> list() {
-		return repo.findAll();
+		return ShipwreckStub.list();
 	}
 	
 	@RequestMapping(value = "shipwrecks", method = RequestMethod.POST)
 	public Shipwreck create(@RequestBody Shipwreck shipwreck) {
-		return repo.saveAndFlush(shipwreck);
+		return ShipwreckStub.create(shipwreck);
 	}
 	
 	@RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.GET)
 	public Shipwreck get(@PathVariable Long id) {
-		return repo.findOne(id);
+		return ShipwreckStub.get(id);
 	}
 	
 	@RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.PUT)
 	public Shipwreck update(@PathVariable Long id, @RequestBody Shipwreck shipwreck) {
-		Shipwreck current = repo.findOne(id);
-		BeanUtils.copyProperties(shipwreck, current);
-		return repo.saveAndFlush(current);
+		return ShipwreckStub.update(id, shipwreck);
 	}
 	
 	@RequestMapping(value = "shipwrecks/{id}", method = RequestMethod.DELETE)
 	public Shipwreck delete(@PathVariable Long id) {
-		Shipwreck current = repo.findOne(id);
-		repo.delete(current);
-		return current;
+		return ShipwreckStub.delete(id);
 	}
 	
 }
