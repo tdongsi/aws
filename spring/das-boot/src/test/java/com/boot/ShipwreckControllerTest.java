@@ -2,6 +2,9 @@ package com.boot;
 
 import static org.junit.Assert.assertEquals;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -33,7 +36,9 @@ public class ShipwreckControllerTest {
 		
 		Shipwreck wreck = sc.get(1L);
 		verify(repo).findOne(1L);
-		assertEquals(1L, wreck.getId().longValue());
+		
+//		assertEquals(1L, wreck.getId().longValue());
+		assertThat(wreck.getId(), is(1L));
 	}
 
 }
